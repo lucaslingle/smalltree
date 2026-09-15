@@ -1,6 +1,7 @@
 #include <array>
 #include <algorithm>
 #include <queue>
+#include <stdexcept>
 #include "tree.hpp"
 
 void Node::populate_valid(const State &state) {
@@ -30,14 +31,17 @@ void Node::eval() {
             value = (status == PlusWon) ? 1 : -1;
     } else {
         bool is_max = (state.get_turn() == 1);
-        double val = (is_max) ? -100 : 100;
+        double best_val = (is_max) ? -100 : 100;
         for (int i = 0; i != 9; ++i)
             if (valid[i]) {
                 childrens[i]->eval();
-                double val_i = childrens[i]->value;
-                val = (is_max) ? std::max(val_i, val) : std::min(val_i, val);
+                double val = childrens[i]->value;
+                action_values[i] = val;
+                best_val = (is_max) ? std::max(best_val, val) : std::min(best_val, val);
+            } else {
+                action_values[i] = (is_max) ? -100 : 100;
             }
-        value = val;
+        value = best_val;
     }
 }
 
@@ -60,4 +64,24 @@ void Tree::grow() {
 
 void Tree::eval() {
     root->eval();
+}
+
+void Tree::user_play(int turn, int loc) {
+    if (turn != root->state.get_turn())
+        throw std::invalid_argument("Wrong player for turn.");
+    if (!(root->valid[loc]))
+        throw std::invalid_argument("Invalid move.");
+    root = root->childrens[loc];
+    root->parent = nullptr;
+}
+
+int Tree::computer_play(int turn) {
+    if (turn != root->state.get_turn())
+        throw std::invalid_argument("Wrong player for turn.");
+    bool is_max = (turn == 1);
+    auto best = std::find(root->action_values.begin(), root->action_values.end(), root->value);
+    int loc = std::distance(root->action_values.begin(), best);
+    root = root->childrens[loc];
+    root->parent = nullptr;
+    return loc;
 }

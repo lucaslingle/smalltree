@@ -1,5 +1,5 @@
 #include <iostream>
-#include "state.h"
+#include "state.hpp"
 
 int main() {
     State game;

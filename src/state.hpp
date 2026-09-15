@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 #include <array>
 using Board = std::array<int, 9>;
@@ -8,6 +9,8 @@ enum Status {
     MinusWon,
     Tie
 };
+
+std::string statusToString(Status s);
 
 class State {
 public:

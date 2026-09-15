@@ -1,3 +1,4 @@
+#pragma once
 #include <array>
 #include <algorithm>
 #include <queue>
@@ -16,6 +17,7 @@ private:
     State state;
     int value;
     std::array<bool, 9> valid;
+    std::array<double, 9> action_values;
     std::array<std::shared_ptr<Node>, 9> childrens = {};
 };
 
@@ -27,4 +29,6 @@ public:
     double get_value() const { return root->value; }
     void grow();
     void eval();
+    void user_play(int turn, int loc);
+    int computer_play(int turn);
 };

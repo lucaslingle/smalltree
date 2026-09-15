@@ -2,6 +2,15 @@
 #include <stdexcept>
 #include "state.hpp"
 
+std::string statusToString(Status s) {
+    switch (s) {
+        case Status::InProgress: return "in progress";
+        case Status::PlusWon:    return "1 won";
+        case Status::MinusWon:   return "-1 won";
+        default:                 return "tie";
+    }
+}
+
 bool State::is_valid(int turn, int loc) const {
     if (get_status() != InProgress)
         return false;
