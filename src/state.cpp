@@ -1,8 +1,9 @@
 #include <iostream>
 #include <stdexcept>
+#include <string>
 #include "state.hpp"
 
-std::string statusToString(Status s) {
+std::string status_to_string(Status s) {
     switch (s) {
         case Status::InProgress: return "in progress";
         case Status::PlusWon:    return "1 won";
@@ -11,29 +12,35 @@ std::string statusToString(Status s) {
     }
 }
 
-bool State::is_valid(int turn, int loc) const {
+bool State::is_valid(int turn, int action) const {
+    if (get_turn() != turn)
+        return false;
     if (get_status() != InProgress)
         return false;
-    if (board[loc] != 0)
+    if (action < 0 || 9 <= action)
+        return false;
+    if (board[action] != 0)
         return false;
     return true;
 }
 
-State State::play(int turn, int loc) const {
+State State::play(int turn, int action) const {
     if (get_status() != InProgress)
-        throw std::invalid_argument("Game is not in progress.");
-    if (board[loc] != 0)
-        throw std::invalid_argument("Location is occupied.");
-    return State(board, turn, loc);
+        throw std::runtime_error("Game is not in progress.");
+    if (get_turn() != turn)
+        throw std::invalid_argument("Wrong player for turn.");
+    if (!is_valid(turn, action))
+        throw std::invalid_argument("Invalid action.");
+    return State(board, turn, action);
 }
 
-std::ostream& State::print(std::ostream &ost) const {
+std::ostream& operator<<(std::ostream &ost, const State &game) {
     for (int i = 0; i != 9; ++i) {
         if (i % 3 == 0)
             ost << "\n";
-        ost << board[i] << " ";
+        ost << game.board[i] << " ";
     }
-    ost << std::endl;
+    ost << "\n";
     return ost;
 }
 

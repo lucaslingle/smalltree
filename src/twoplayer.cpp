@@ -3,15 +3,18 @@
 
 int main() {
     State game;
-    int loc;
+    int action;
     while (game.get_status() == InProgress) {
-        game.print(std::cout);
-        std::cout << game.get_turn()
-                  << " to play. Where should they go?" 
-                  << std::endl;
-        if (std::cin >> loc)
-            game = game.play(game.get_turn(), loc);
+        std::cout << game;
+        std::cout << game.get_turn() << " to play. Where should they go?" << std::endl;
+        
+        if (std::cin >> action)
+            game = game.play(game.get_turn(), action);
+        else {
+            std::cerr << "Invalid input." << std::endl;
+            return -1;
+        }
     }
-    std::cout << "game status: " << game.get_status() << std::endl;
+    std::cout << "Game status: " << status_to_string(game.get_status()) << std::endl;
     return 0;
 }

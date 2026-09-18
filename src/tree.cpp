@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <queue>
 #include <stdexcept>
+#include <memory>
 #include "tree.hpp"
 
 void Node::populate_valid(const State &state) {
@@ -10,15 +11,14 @@ void Node::populate_valid(const State &state) {
 }
 
 Node::Node() : 
-    parent(nullptr), prev_action(-1), state(State()), value(0) 
+    parent(nullptr), prev_action(-1), state(State()), value(0.0) 
 {
     populate_valid(state);
 }
 
-Node::Node(std::shared_ptr<Node> p, int turn, int loc) :
-    parent(p.get()), prev_action(loc), state(p->state.play(turn, loc)), value(0)
+Node::Node(Node *p, int turn, int action) :
+    parent(p), prev_action(action), state(p->state.play(turn, action)), value(0.0)
 {
-    // set up the new node
     populate_valid(state);
 }
 
@@ -47,16 +47,16 @@ void Node::eval() {
 
 void Tree::grow() {
     // breadth-first search
-    std::shared_ptr<Node> node;
-    std::queue<std::shared_ptr<Node>> q;
-    q.push(root);
+    Node* node;
+    std::queue<Node*> q;
+    q.push(root.get());
     while (!q.empty()) {
         node = q.front();
         q.pop();
         for (int i = 0; i != 9; ++i) {
             if (node->valid[i] && node->childrens[i] == nullptr) {
-                node->childrens[i] = std::shared_ptr<Node>(new Node(node, node->state.get_turn(), i));
-                q.push(node->childrens[i]);
+                node->childrens[i] = std::unique_ptr<Node>(new Node(node, node->state.get_turn(), i));
+                q.push(node->childrens[i].get());
             }
         }
     }
@@ -66,22 +66,33 @@ void Tree::eval() {
     root->eval();
 }
 
-void Tree::user_play(int turn, int loc) {
-    if (turn != root->state.get_turn())
+void Tree::user_play(int turn, int action) { 
+    if (root->state.get_status() != InProgress)
+        throw std::runtime_error("Game is not in progress.");
+    if (root->state.get_turn() != turn)
         throw std::invalid_argument("Wrong player for turn.");
-    if (!(root->valid[loc]))
-        throw std::invalid_argument("Invalid move.");
-    root = root->childrens[loc];
+    if (!root->state.is_valid(turn, action))
+        throw std::invalid_argument("Invalid action."); 
+
+    root = std::move(root->childrens[action]);
     root->parent = nullptr;
 }
 
 int Tree::computer_play(int turn) {
-    if (turn != root->state.get_turn())
+    if (root->state.get_status() != InProgress)
+        throw std::runtime_error("Game is not in progress.");
+    if (root->state.get_turn() != turn)
         throw std::invalid_argument("Wrong player for turn.");
-    bool is_max = (turn == 1);
+
     auto best = std::find(root->action_values.begin(), root->action_values.end(), root->value);
-    int loc = std::distance(root->action_values.begin(), best);
-    root = root->childrens[loc];
+    int action = std::distance(root->action_values.begin(), best);
+
+    // This check shouldnt trigger since game is InProgress
+    // there should be at least one action whose action_value is not a mask value
+    if (!root->state.is_valid(turn, action))
+        throw std::invalid_argument("Invalid action.");
+
+    root = std::move(root->childrens[action]);
     root->parent = nullptr;
-    return loc;
+    return action;
 }

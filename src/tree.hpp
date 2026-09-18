@@ -2,33 +2,34 @@
 #include <array>
 #include <algorithm>
 #include <queue>
+#include <memory>
 #include "state.hpp"
 
 class Node {
 friend class Tree; 
 private:
     Node();
-    Node(std::shared_ptr<Node> p, int turn, int loc);
+    Node(Node* p, int turn, int action);
     void populate_valid(const State &state);
     void eval();
 
     Node *parent;
     int prev_action;
     State state;
-    int value;
+    double value;
     std::array<bool, 9> valid;
     std::array<double, 9> action_values;
-    std::array<std::shared_ptr<Node>, 9> childrens = {};
+    std::array<std::unique_ptr<Node>, 9> childrens = {};
 };
 
 class Tree {
 private:
-    std::shared_ptr<Node> root = std::shared_ptr<Node>(new Node());
+    std::unique_ptr<Node> root = std::unique_ptr<Node>(new Node());
 public:
     Tree() = default;
     double get_value() const { return root->value; }
     void grow();
     void eval();
-    void user_play(int turn, int loc);
+    void user_play(int turn, int action);
     int computer_play(int turn);
 };
