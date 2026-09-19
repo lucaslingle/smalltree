@@ -1,19 +1,28 @@
 # smalltree
 Tic tac toe in C++
 
+### Build
+Build with CMake:
+```bash
+cmake -S . -B build
+cmake --build build
+```
+This produces three executables in `build/`: `oneplayer` (vs. the computer), `twoplayer` (vs. another human), and `zeroplayer` (prints the game-theoretic value of the empty board, i.e. no players).
+
 ### Usage
-Compile the code somehow (will add cmake later to make easier across platforms)
+Start a game against the computer as follows:
 ```bash
-clang++ -std=c++11 -stdlib=libc++ -I. oneplayer.cpp tree.cpp state.cpp -o tictactoe.out
+./build/oneplayer
 ```
-
-Start a game as follows:
-```bash
-./tictactoe.out
+The move locations use zero-based raster-scan order, like so:
 ```
-The entered move locations correspond to the grid locations in zero-based raster-scan order, so upper left is 0, upper right is 2, center left is 3, etc.
+0 1 2
+3 4 5
+6 7 8
+```
+The computer will move immediately after you, before the board is printed. The player icons are 1 for X and -1 for O. Blank spaces are denoted by zeros. 
 
-### Example game
+### Example
 ```
 0 0 0 
 0 0 0 
@@ -42,6 +51,6 @@ Your turn. Where will you go?
 -1 -1 -1 
 -1 1 1 
 1 1 0 
-game status: -1 won
+Game status: -1 won
 ```
 As implemented, the computer does not favor shorter games over longer ones when both are won, so it can be a bit cheeky at times. 
