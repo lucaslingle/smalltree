@@ -54,3 +54,9 @@ Your turn. Where will you go?
 Game status: -1 won
 ```
 As implemented, the computer does not favor shorter games over longer ones when both are won, so it can be a bit cheeky at times. 
+
+### Tests
+To run the unit tests, you can run the following after building:
+```bash
+cd build && ctest --output-on-failure
+```
