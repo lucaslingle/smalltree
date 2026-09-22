@@ -53,7 +53,7 @@ Your turn. Where will you go?
 1 1 0 
 Game status: -1 won
 ```
-As implemented, the computer does not favor shorter games over longer ones when both are won, so it can be a bit cheeky at times. 
+As implemented, the computer does not favor shorter games over longer ones when both are guaranteed won under optimal play.
 
 ### Tests
 To run the unit tests, you can run the following after building:
